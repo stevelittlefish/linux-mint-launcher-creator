@@ -1,0 +1,44 @@
+name: Build and Publish Release
+
+# Cut a v* tag (./make_release.sh vX.Y.Z "msg") and this builds the binary and
+# attaches it to a GitHub Release. Built on Ubuntu 24.04, which Mint 22 is
+# based on, so the binary links against the same glibc and GTK 4.14.
+
+on:
+  push:
+    tags:
+      - "v*"
+
+jobs:
+  test:
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - run: sudo apt-get update && sudo apt-get install -y libgtk-4-dev
+      - run: cargo test
+
+  build-and-release:
+    needs: test
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install GTK 4
+        run: sudo apt-get update && sudo apt-get install -y libgtk-4-dev
+
+      - name: Build release binary
+        run: ./build.sh
+
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release create "$GITHUB_REF_NAME" dist/launcher-creator \
+            --title "$GITHUB_REF_NAME" \
+            --notes-from-tag
