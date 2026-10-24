@@ -1,6 +1,6 @@
 name: Build and Publish Release
 
-# Cut a v* tag (./make_release.sh vX.Y.Z "msg") and this builds the binary and
+# Cut a v* tag (./make_release.sh vX.Y.Z "msg") and this builds the tarball and
 # attaches it to a GitHub Release. Built on Ubuntu 24.04, which Mint 22 is
 # based on, so the binary links against the same glibc and GTK 4.14.
 
@@ -39,6 +39,6 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          gh release create "$GITHUB_REF_NAME" dist/launcher-creator \
+          gh release create "$GITHUB_REF_NAME" dist/launcher-creator-linux-x86_64.tar.gz \
             --title "$GITHUB_REF_NAME" \
             --notes-from-tag
